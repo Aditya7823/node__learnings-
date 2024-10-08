@@ -1,49 +1,82 @@
 const express = require('express');
+const path = require('path');
+const shortid = require('shortid'); // For generating short URLs
+const mongoose = require('mongoose');
+const Url = require('./models/url'); // Assuming this file has the correct MongoDB schema
+
 const app = express();
 const port = 8000;
-const Url=require('./models/url');
-const { connectToMongoDb } = require('./connect');
 
-// Connect to MongoDB
-connectToMongoDb('mongodb://localhost:27017/short-url')
-  .then(() => {
-    console.log('Connected to MongoDB successfully');
-  })
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-  });
-
-// Middleware to parse incoming JSON requests
+// Middleware to parse incoming form data and JSON requests
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Route to handle redirection based on short ID
-app.get('/:shortId', async (req, res) => {
-  try {
-    const shortId = req.params.shortId;
+// Setting up EJS as the template engine
+app.set("view engine", "ejs");
+app.set("views", path.resolve("./views"));
 
-    // Find the URL entry by shortId and update visitedHistory
-    const entry = await Url.findOneAndUpdate(
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/short-url', {
+
+})
+  .then(() => console.log('Connected to MongoDB successfully'))
+  .catch((error) => console.error('Error connecting to MongoDB:', error));
+
+// Render the form on the homepage
+app.get("/", (req, res) => {
+  res.render("home", { shortUrl: null });
+});
+
+// Handle form submission to generate short URL
+app.post("/", async (req, res) => {
+  const { url } = req.body;
+
+  // Check if URL is provided
+  if (!url) {
+    return res.status(400).render("home", { shortUrl: null, error: "URL is required" });
+  }
+
+  // Generate a short ID for the URL
+  const shortId = shortid.generate();
+
+  // Create a new document in MongoDB
+  await Url.create({
+    shortId,
+    redirectUrl: url,
+    visitHistory: [],
+  });
+
+  // Render the home page with the generated short URL
+  res.render("home", {
+    shortUrl: `${req.protocol}://${req.get('host')}/${shortId}`, // Dynamically generate the full URL
+  });
+});
+
+// Redirect to the original URL when the short URL is visited
+app.get("/:shortId", async (req, res) => {
+  try {
+    const { shortId } = req.params;
+
+    // Find the URL by the shortId and update the visit history
+    const urlEntry = await Url.findOneAndUpdate(
       { shortId },
       { $push: { visitHistory: { timestamp: Date.now() } } },
       { new: true }
     );
 
-    if (!entry) {
+    // If the short URL is not found, return an error
+    if (!urlEntry) {
       return res.status(404).json({ error: 'Short URL not found' });
     }
 
     // Redirect to the original URL
-    res.redirect(entry.redirectUrl);
+    return res.redirect(urlEntry.redirectUrl);
   } catch (error) {
-    console.error('Error retrieving URL:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error redirecting URL:', error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// Import and use the URL route (for generating and analytics)
-const urlRoute = require('./routes/url');
-app.use('/', urlRoute);
-
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(`Server is running on http://localhost:${port}`);
 });

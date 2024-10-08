@@ -20,8 +20,11 @@ async function handleGenerateShortURl(req, res) {
     visitHistory: [],
   });
 
-  // Return the generated short ID as JSON
-  return res.json({ id: shortId });
+  // Create the short URL to be displayed on the frontend
+  const shortUrl = `${req.protocol}://${req.get('host')}/${shortId}`;
+
+  // Render the home page with the short URL
+  return res.render('home', { shortUrl });
 }
 
 // Function to handle analytics retrieval
