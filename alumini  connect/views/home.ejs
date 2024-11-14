@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include head partial for meta tags, styles, etc. -->
+    <%- include('./partials/head') %>
+</head>
+<body>
+    <!-- Include navigation partial for navbar or header -->
+    <%- include('./partials/nav') %>
+
+    <!-- Main content section -->
+    <div class="container">
+        <h1>I am Aditya</h1>
+        
+        <!-- Display the user data in JSON format -->
+        <%= JSON.stringify(user) %>
+    </div>
+
+    <!-- Include scripts partial for JavaScript files -->
+    <%- include('./partials/scripts') %>
+</body>
+</html>
