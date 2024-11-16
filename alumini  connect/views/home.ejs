@@ -9,12 +9,7 @@
     <%- include('./partials/nav') %>
 
     <!-- Main content section -->
-    <div class="container">
-        <h1>I am Aditya</h1>
-        
-        <!-- Display the user data in JSON format -->
-        <%= JSON.stringify(user) %>
-    </div>
+    <%= JSON.stringify(user) %>
 
     <!-- Include scripts partial for JavaScript files -->
     <%- include('./partials/scripts') %>

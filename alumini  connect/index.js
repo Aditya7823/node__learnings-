@@ -18,7 +18,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Set view engine to EJS
 app.set('view engine', 'ejs');
-app.set('views', path.resolve(__dirname, 'views'));
+app.set('views', path.resolve(__dirname,
+   'views'));
+   app.use((req, res, next) => {
+    res.locals.user = req.user || null; // Make `user` available globally
+    next();
+});
+
 
 // Serve static files
 app.use(express.static('public'));
