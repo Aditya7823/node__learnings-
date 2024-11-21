@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include head partial for meta tags, styles, etc. -->
+    <%- include('./partials/head') %>
+</head>
+<body>
+    <!-- Include navigation partial for navbar or header -->
+    <%- include('./partials/nav') %>
+   <div class="container mt-3">
+    <form action="/blog/add-new" method="POST" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="coverImage" class="form-label">Cover Image</label>
+            <input type="file" class="form-control" id="coverImage" name="coverImage">
+        </div>
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title">
+        </div>
+        <div class="mb-3">
+            <label for="body" class="form-label">Body</label>
+            <div class="form-floating">
+                <textarea class="form-control" id="floatingTextarea2" name="body" style="height: 100px"></textarea>
+              </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+   </div>
+
+    <!-- Include scripts partial for JavaScript files -->
+    <%- include('./partials/scripts') %>
+</body>
+</html>
