@@ -1,17 +1,22 @@
-<nav class="navbar navbar-expand-lg bg-danger">
+<nav class="navbar navbar-expand-lg  sticky-top" style=" background-color: #333333;">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Blogify</a>
+        <!-- Brand -->
+        <a class="navbar-brand text-light" href="#">Blogify</a>
+        
+        <!-- Toggler -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+        
+        <!-- Navbar content -->
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <!-- Left-aligned navbar items -->
+            <!-- Left-aligned items -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/">Home</a>
+                    <a class="nav-link text-light active" aria-current="page" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="blog/add-blog">Add Blog</a>
+                    <a class="nav-link text-light" href="blog/add-blog">Add Blog</a>
                 </li>
             </ul>
             
@@ -19,7 +24,7 @@
             <ul class="navbar-nav ms-auto">
                 <% if (user) { %>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle text-light" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <img 
                                 src="<%= user.profileImageUrl || '/images/profile.png' %>" 
                                 alt="Profile" 
@@ -30,23 +35,83 @@
                             > 
                             <span class="ms-2"><%= user.fullname || 'Guest' %></span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <a class="dropdown-item" href="/profile">Profile</a>
-                            <a class="dropdown-item" href="/settings">Settings</a>
+                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <a class="dropdown-item text-light" href="/profile">Profile</a>
+                            <a class="dropdown-item text-light" href="/settings">Settings</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="/logout">Logout</a>
+                            <a class="dropdown-item text-danger" href="/logout">Logout</a>
                         </div>
                     </li>
                 <% } else { %>
                     <!-- If user is not logged in -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
+                        <a class="nav-link text-light" href="/user/signin">Sign In</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/signup">Sign Up</a>
+                        <a class="nav-link text-light" href="/user/signup">Sign Up</a>
                     </li>
                 <% } %>
             </ul>
         </div>
     </div>
 </nav>
+<style>
+
+    /* Navbar background and text colors */
+.navbar {
+    background-color: #000000; /* Dark grey */
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    color: #dcdcdc; /* Light grey for text */
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-nav .nav-link:hover {
+    color: #ffffff; /* White on hover */
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%2875, 75, 75, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Dropdown menu styles */
+.dropdown-menu-dark {
+    background-color: #000000; /* Slightly lighter dark grey */
+    border: none;
+}
+
+.dropdown-item {
+    color: #dcdcdc; /* Light grey for dropdown items */
+}
+
+.dropdown-item:hover {
+    background-color: #495057; /* Medium grey for hover */
+    color: #ffffff; /* White text on hover */
+}
+
+.dropdown-divider {
+    border-color: #6c757d; /* Grey divider */
+}
+
+/* Profile image styles */
+.nav-item img {
+    border: 2px solid #ffffff; /* White border for profile image */
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+/* Logout button style */
+.text-danger {
+    color: #ff4d4d !important; /* Light red for logout */
+}
+
+.text-danger:hover {
+    color: #ff1a1a !important; /* Brighter red on hover */
+}
+
+</style>

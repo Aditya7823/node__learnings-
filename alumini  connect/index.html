@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In/Sign Up</title>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+  <style>
+    body {
+      background-color: #121212; /* Dark mode */
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .card {
+      background-color: #1e1e1e; /* Dark card background */
+      width: 400px;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+    .card h2 {
+      margin-bottom: 20px;
+    }
+    .card button {
+      display: block;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 16px;
+      margin: 10px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .card button:hover {
+      background-color: #0056b3;
+    }
+    .card p {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <!-- Centered Card -->
+  <div class="card">
+    <h2>Welcome Back!</h2>
+    <p>Sign in or create an account to get started.</p>
+
+    <!-- Sign In and Sign Up Buttons -->
+    <button id="login">Sign In / Sign Up</button>
+    <button id="logout" style="display: none;">Log Out</button>
+  </div>
+
+  <script>
+    // Initialize Auth0
+    const auth0 = await createAuth0Client({
+      domain: "YOUR_AUTH0_DOMAIN", // Replace with your Auth0 domain
+      clientId: "YOUR_CLIENT_ID", // Replace with your Auth0 client ID
+    });
+
+    // Update UI based on authentication state
+    const updateUI = async () => {
+      const isAuthenticated = await auth0.isAuthenticated();
+      document.getElementById("login").style.display = isAuthenticated ? "none" : "block";
+      document.getElementById("logout").style.display = isAuthenticated ? "block" : "none";
+
+      if (isAuthenticated) {
+        const user = await auth0.getUser();
+        alert(`Welcome, ${user.name}`);
+      }
+    };
+
+    // Log in user
+    document.getElementById("login").addEventListener("click", async () => {
+      await auth0.loginWithRedirect({
+        redirect_uri: window.location.origin,
+      });
+    });
+
+    // Log out user
+    document.getElementById("logout").addEventListener("click", () => {
+      auth0.logout({
+        returnTo: window.location.origin,
+      });
+    });
+
+    // Handle redirect callback
+    window.onload = async () => {
+      const query = window.location.search;
+      if (query.includes("code=") && query.includes("state=")) {
+        await auth0.handleRedirectCallback();
+        window.history.replaceState({}, document.title, "/");
+      }
+      updateUI();
+    };
+  </script>
+</body>
+</html>

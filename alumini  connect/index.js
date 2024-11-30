@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -10,7 +12,7 @@ const cookieParser = require('cookie-parser');
 const { checkForAuthenticationCookie } = require('./middlewares/authentication');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/blogify', {})
+mongoose.connect(process.env.MONGO_URL, {})
     .then(() => console.log("Connected to MongoDB"))
     .catch(err => console.error("MongoDB connection error:", err));
 
@@ -36,14 +38,34 @@ app.use(cookieParser());
 // Authentication middleware
 app.use(checkForAuthenticationCookie());
 
+
+
+app.get('/landing', (req, res) => {
+    res.render("landing");
+});
+
+
+
 // Home route
 app.get('/', async (req, res) => {
+   
     try {
         const allBlogs = await Blog.find({}); // Use `Blog` (uppercase)
         console.log("Home route accessed");
         res.render("home", {
             user: req.user,
             blogs: allBlogs // Correctly pass 'blogs'
+        });
+    } catch (error) {
+        console.error("Error fetching blogs:", error);
+        res.status(500).send("An error occurred while loading the home page.");
+    }
+});
+app.get('/logout', async (req, res) => {
+    try {
+        
+        res.render("landing", {
+           
         });
     } catch (error) {
         console.error("Error fetching blogs:", error);
@@ -57,7 +79,7 @@ app.use('/user', userRouter);
 app.use('/blog', blogRouter);
 
 // Start the server
-const port = 8000;
+const port = process.env.PORT || 8000;
 app.listen(port, () => {
     console.log("Server has been started on port", port);
 });

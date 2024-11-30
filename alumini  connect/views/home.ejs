@@ -10,7 +10,7 @@
         .card-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 60px;
             justify-content: center;
         }
 
@@ -21,8 +21,9 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px  #ddd;
             transition: transform 0.3s ease-in-out;
+            background-image: url('/images/grey.avif');
         }
 
         .card img {
@@ -43,7 +44,7 @@
 
         .card-text {
             font-size: 1rem;
-            color: #555;
+            color: #000000;
         }
 
         .btn-primary {
@@ -80,29 +81,70 @@
                 width: 100%; /* 1 card per row for small screens */
             }
         }
+        body {
+    background-image: url('/images/okok.avif');
+    background-repeat: no-repeat;       /* Prevents the image from repeating */
+    background-size: cover;            /* Scales the image to cover the entire viewport */
+    background-position: center center; /* Centers the image both vertically and horizontally */
+    background-attachment: fixed;      /* Keeps the image fixed while scrolling */
+}
+
     </style>
 </head>
 <body>
     <!-- Include navigation partial for navbar or header -->
     <%- include('./partials/nav') %>
 
-    <div class="container mt-3">
-        <!-- Loop through all blogs and display them as Bootstrap cards -->
-        <div class="card-container">
-            <% blogs.forEach(blog => { %>
-                <div class="card mb-3">
-                    <img src="<%= blog.coverImageURL ? blog.coverImageURL : '/uploads/defaultblogimage.jpg' %>" class="card-img-top" alt="Cover Image">
-                    <div class="card-body">
-                        <h5 class="card-title"><%= blog.title %></h5>
-                        <p class="card-text"><%= blog.body %></p>
-                        <a href="/blog/<%= blog._id %>" class="btn btn-primary">Read More</a>
+
+    <div class="d-flex">
+        <!-- Side Menu -->
+        <%- include('./partials/sidemenu') %>
+    
+        <!-- Blog Cards Container -->
+        <div class="container mt-3 flex-grow-1">
+            <!-- Loop through all blogs and display them as Bootstrap cards -->
+            <div class="card-container" style="margin-left: 150px;">
+                <% blogs.forEach(blog => { %>
+                    <div class="card mb-3" onclick="window.location.href='/blog/<%= blog._id %>?user=<%= user || null %>'">
+                        <img src="<%= blog.coverImageURL ? blog.coverImageURL : '/uploads/defaultblogimage.jpg' %>" class="card-img-top" alt="Cover Image">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= blog.title %></h5>
+                            <p class="card-text" id="blog-body-<%= blog._id %>" style="max-height: 50px; overflow: hidden;">
+                                <%= blog.body.split(' ').slice(0, 15).join(' ') %><%= blog.body.split(' ').length > 15 ? '...' : '' %>
+                            </p>
+                            <button class="btn btn-primary" id="toggle-btn-<%= blog._id %>" onclick="toggleBlogBody('<%= blog._id %>', '<%= blog.body %>')">
+                                <%=  'Read More' %>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            <% }) %>
+                <% }) %>
+            </div>
         </div>
     </div>
+    
 
     <!-- Include scripts partial for JavaScript files -->
     <%- include('./partials/scripts') %>
+    <script>
+
+
+
+        function toggleBlogBody(blogId) {
+            const blogBody = document.getElementById(`blog-body-${blogId}`);
+            const button = document.getElementById(`toggle-btn-${blogId}`);
+
+            if (blogBody.style.maxHeight === "none") {
+                // Collapse the body
+                blogBody.style.maxHeight = "50px";  // Adjust this value to your desired collapsed height
+                blogBody.style.overflow = "hidden";
+                button.textContent = "Read More";  // Change button text back to 'Read More'
+            } else {
+                // Expand the body to show full text
+                blogBody.style.maxHeight = "none";  // Remove max height to show full text
+                blogBody.style.overflow = "visible";
+                button.textContent = "Compress";  // Change button text to 'Compress'
+            }
+        }
+    </script>
 </body>
 </html>

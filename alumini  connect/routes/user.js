@@ -1,5 +1,6 @@
 const express = require('express');
 const User = require('../models/user');
+const Blog = require('../models/blog');
 const router = express.Router();
 
 router.get('/signin', (req, res) => {
@@ -27,20 +28,30 @@ router.post('/signin', async (req, res) => {
         return res.render("signin",{error  : "incorrect email or password ",});
     }
 });
-
 router.post('/signup', async (req, res) => {
     const { fullname, email, password } = req.body;
 
     try {
-        await User.create({
+        // Create the user in the database
+        const newUser = await User.create({
             fullname,
             email,
-            password ,
-            role: "USER" 
-
+            password,
+            role: "USER"
         });
-        console.log("saved successfully");
-        res.redirect("/");
+
+        // Fetch all blogs
+        const allBlogs = await Blog.find({}); 
+
+        // Log a message for debugging
+        console.log("Home route accessed");
+
+        // Render the 'home' page, passing both the user and the blogs
+        res.render("home", {
+            user: newUser, // Pass the newly created user
+            blogs: allBlogs // Pass the list of blogs
+        });
+    
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).send("Internal Server Error");
