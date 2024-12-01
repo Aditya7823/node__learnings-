@@ -1,9 +1,31 @@
 <div class="side-menu" id="sideMenu">
     <div class="side-menu-header">
-        <a href="#" class="side-menu-brand">Blogify</a>
-        <button class="hamburger-icon" id="hamburgerIcon">
-            <i class="bi bi-list"></i>
-        </button>
+
+        <% if (user) { %>
+            <div class="user-profile">
+                <img 
+                    src="<%= user.profileImageUrl || '/images/profile.png' %>" 
+                    alt="Profile" 
+                    width="50" 
+                    height="50" 
+                    class="rounded-circle"
+                    onerror="this.src='/images/default-profile.png';" 
+                >
+                <span class="ms-2"><%= user.fullname || 'Guest' %></span>
+            </div>
+        <% }
+        else { %>
+            <div class="user-profile">
+                <img 
+                    src="/images/default-profile.png" 
+                    alt="Guest Profile" 
+                    width="50" 
+                    height="50" 
+                    class="rounded-circle"
+                >
+                <span class="ms-2">Guest</span>
+            </div>
+        <% } %>
     </div>
     <div class="side-menu-items">
         <a href="/" class="side-menu-item">
@@ -121,8 +143,8 @@
 /* Media Query for Responsive Collapse */
 @media (max-width: 768px) {
     .side-menu {
-        transform: translateX(-250px); /* Hide side menu */
-        width: 0%; /* Collapse to full width when toggled */
+        transform: translateX(-20px); /* Hide side menu */
+        width: 35%; /* Collapse to full width when toggled */
     }
 
     .side-menu.open {

@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg  sticky-top" style=" background-color: #333333;">
+<nav class="navbar navbar-expand-lg sticky-top" style="background-color: #333333;">
     <div class="container-fluid">
         <!-- Brand -->
         <a class="navbar-brand text-light" href="#">Blogify</a>
@@ -10,56 +10,55 @@
         
         <!-- Navbar content -->
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <!-- Left-aligned items -->
-            <ul class="navbar-nav">
+            <!-- Right-aligned items -->
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
                     <a class="nav-link text-light active" aria-current="page" href="/">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-light" href="blog/add-blog">Add Blog</a>
+                    <a class="nav-link text-light" href="/about">About</a>
                 </li>
-            </ul>
-            
-            <!-- Right-aligned profile dropdown -->
-            <ul class="navbar-nav ms-auto">
-                <% if (user) { %>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-light" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <img 
-                                src="<%= user.profileImageUrl || '/images/profile.png' %>" 
-                                alt="Profile" 
-                                width="30" 
-                                height="30" 
-                                class="rounded-circle"
-                                onerror="this.src='/images/default-profile.png';" 
-                            > 
-                            <span class="ms-2"><%= user.fullname || 'Guest' %></span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="profileDropdown">
-                            <a class="dropdown-item text-light" href="/profile">Profile</a>
-                            <a class="dropdown-item text-light" href="/settings">Settings</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="/logout">Logout</a>
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="/contact">Contact Us</a>
+                </li>
+                <!-- Search box -->
+                <li class="nav-item">
+                    <form class="d-flex" action="/" method="get">
+                        <div class="input-group">
+                            <!-- Search icon container -->
+                            <span 
+                                class="input-group-text bg-dark border-0" 
+                                style="border-radius: 8px 0 0 8px; color: #ffffff;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            
+                            <input 
+                                class="form-control" 
+                                type="search" 
+                                name="title"
+                                placeholder="Search" 
+                                aria-label="Search" 
+                                style="border-radius: 0 8px 8px 0;">
                         </div>
-                    </li>
-                <% } else { %>
-                    <!-- If user is not logged in -->
-                    <li class="nav-item">
-                        <a class="nav-link text-light" href="/user/signin">Sign In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-light" href="/user/signup">Sign Up</a>
-                    </li>
-                <% } %>
+                    </form>
+                </li>
+                
+                
+                
             </ul>
         </div>
     </div>
 </nav>
-<style>
 
-    /* Navbar background and text colors */
+<!-- Add this Bootstrap Icons link to your HTML head -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+/* Navbar styles */
+
+
 .navbar {
-    background-color: #000000; /* Dark grey */
+    background-color: #333333; /* Dark grey */
 }
 
 .navbar-brand {
@@ -68,50 +67,48 @@
 }
 
 .navbar-nav .nav-link {
-    color: #dcdcdc; /* Light grey for text */
+    color: #dcdcdc; /* Light grey */
     transition: color 0.3s ease-in-out;
+    margin-left: 20px;
+    margin-right: 20px;
+    
 }
 
 .navbar-nav .nav-link:hover {
-    color: #ffffff; /* White on hover */
+    color: #686868; /* White on hover */
+    
 }
 
-.navbar-toggler-icon {
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba%2875, 75, 75, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-}
 
-/* Dropdown menu styles */
-.dropdown-menu-dark {
-    background-color: #000000; /* Slightly lighter dark grey */
+/* Search box styles */
+.form-control {
+    background-color: #444444; /* Slightly lighter dark background */
+    color: #ffffff; /* White text */
     border: none;
+    border-radius: 30px;
+    padding: 5px 15px;
 }
 
-.dropdown-item {
-    color: #dcdcdc; /* Light grey for dropdown items */
+.form-control::placeholder {
+    color: #cccccc; /* Placeholder text color */
 }
 
-.dropdown-item:hover {
-    background-color: #495057; /* Medium grey for hover */
-    color: #ffffff; /* White text on hover */
+.btn-outline-light {
+    border: none;
+    color: #ffffff;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 
-.dropdown-divider {
-    border-color: #6c757d; /* Grey divider */
+.btn-outline-light:hover {
+    background-color: #ffffff;
+    color: #333333;
 }
 
-/* Profile image styles */
-.nav-item img {
-    border: 2px solid #ffffff; /* White border for profile image */
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-}
-
-/* Logout button style */
-.text-danger {
-    color: #ff4d4d !important; /* Light red for logout */
-}
-
-.text-danger:hover {
-    color: #ff1a1a !important; /* Brighter red on hover */
+.navbar-nav .nav-link.active {
+    color: #f39c12;
+     /* Highlighted active link color */
+    font-weight: bold;
+    text-decoration: underline;
 }
 
 </style>

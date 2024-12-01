@@ -48,19 +48,40 @@ app.get('/landing', (req, res) => {
 
 // Home route
 app.get('/', async (req, res) => {
-   
+    const { title } = req.query; // Extract 'title' from query parameters
+
     try {
-        const allBlogs = await Blog.find({}); // Use `Blog` (uppercase)
-        console.log("Home route accessed");
+        let allBlogs;
+
+        if (title) {
+            // Find all blogs and filter by title using JavaScript array filter
+            allBlogs = await Blog.find({});
+            allBlogs = allBlogs.filter(blog => blog.title.toLowerCase().includes(title.toLowerCase()));
+            console.log(allBlogs);
+        } else {
+            // Fetch all blogs if no title search query is provided
+            allBlogs = await Blog.find({});
+        }
+
+        console.log("Home route accessed with title:", title);
         res.render("home", {
             user: req.user,
-            blogs: allBlogs // Correctly pass 'blogs'
+            blogs: allBlogs, // Pass the filtered blogs to the home view
         });
     } catch (error) {
         console.error("Error fetching blogs:", error);
         res.status(500).send("An error occurred while loading the home page.");
     }
 });
+
+
+
+
+
+
+
+
+
 app.get('/logout', async (req, res) => {
     try {
         

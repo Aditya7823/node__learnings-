@@ -3,106 +3,144 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In/Sign Up</title>
-  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+  <title>Interactive Button with Modal</title>
   <style>
-    body {
-      background-color: #121212; /* Dark mode */
-      color: white;
+    /* Main Wrapper Styles */
+    #custom-button-wrapper {
+      --x: 0;
+      --y: 0;
+      --xp: 0;
+      --yp: 0;
+      --hue: calc(0 + (var(--xp) * 500));
+      --bg: hsl(0 0% 10%);
+      --size: 100px;
+      --glow: radial-gradient(
+          50% 50% at center,
+          hsl(var(--hue) 80% 85%),
+          hsl(var(--hue) 80% 70%),
+          transparent
+        )
+        calc((var(--x) * 1px) - (var(--size) * 0.5))
+        calc((var(--y) * 1px) - (var(--size) * 0.5)) / var(--size) var(--size) no-repeat fixed;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
-      font-family: Arial, sans-serif;
+      background-color: black;
     }
-    .card {
-      background-color: #1e1e1e; /* Dark card background */
-      width: 400px;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      text-align: center;
-    }
-    .card h2 {
-      margin-bottom: 20px;
-    }
-    .card button {
-      display: block;
-      width: 100%;
-      background-color: #007bff;
+
+    /* Button Styles */
+    #custom-button-wrapper button {
+      border-radius: 1rem;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.1ch;
+      background: var(--bg);
+      border: 4px solid transparent;
+      box-shadow: 0 1px hsl(0 0% 100% / 0.15) inset;
+      cursor: pointer;
+      background: linear-gradient(var(--bg), var(--bg)) padding-box, var(--glow),
+        linear-gradient(black, black) border-box;
+      transition: background-size 0.24s;
+      touch-action: none;
+      position: relative;
+      padding: 1rem 2rem;
       color: white;
-      border: none;
-      padding: 10px 15px;
       font-size: 16px;
-      margin: 10px 0;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 20px;
+      display: none; /* Initially hidden */
+      text-align: center;
+      z-index: 1000;
+    }
+
+    /* Modal Header */
+    .modal h2 {
+      margin: 0 0 15px 0;
+      color: black;
+    }
+
+    /* Modal Buttons */
+    .modal button {
+      margin: 10px;
+      padding: 10px 20px;
+      border: none;
       border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-size: 16px;
     }
-    .card button:hover {
-      background-color: #0056b3;
+
+    .modal button.signin {
+      background-color: #007bff;
+      color: white;
     }
-    .card p {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #bbb;
+
+    .modal button.signup {
+      background-color: #28a745;
+      color: white;
+    }
+
+    /* Modal Close Button */
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      color: black;
+      cursor: pointer;
+    }
+
+    /* Overlay Styles */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      display: none; /* Initially hidden */
     }
   </style>
 </head>
 <body>
-  <!-- Centered Card -->
-  <div class="card">
-    <h2>Welcome Back!</h2>
-    <p>Sign in or create an account to get started.</p>
-
-    <!-- Sign In and Sign Up Buttons -->
-    <button id="login">Sign In / Sign Up</button>
-    <button id="logout" style="display: none;">Log Out</button>
-  </div>
-
+  <!-- Button Wrapper -->
+  
   <script>
-    // Initialize Auth0
-    const auth0 = await createAuth0Client({
-      domain: "YOUR_AUTH0_DOMAIN", // Replace with your Auth0 domain
-      clientId: "YOUR_CLIENT_ID", // Replace with your Auth0 client ID
+    // Get modal, overlay, and button elements
+    const modal = document.getElementById('modal');
+    const overlay = document.getElementById('overlay');
+    const showModalButton = document.getElementById('show-modal-button');
+    const closeModal = document.getElementById('close-modal');
+
+    // Show modal and overlay on button click
+    showModalButton.addEventListener('click', () => {
+      modal.style.display = 'block';
+      overlay.style.display = 'block';
     });
 
-    // Update UI based on authentication state
-    const updateUI = async () => {
-      const isAuthenticated = await auth0.isAuthenticated();
-      document.getElementById("login").style.display = isAuthenticated ? "none" : "block";
-      document.getElementById("logout").style.display = isAuthenticated ? "block" : "none";
-
-      if (isAuthenticated) {
-        const user = await auth0.getUser();
-        alert(`Welcome, ${user.name}`);
-      }
-    };
-
-    // Log in user
-    document.getElementById("login").addEventListener("click", async () => {
-      await auth0.loginWithRedirect({
-        redirect_uri: window.location.origin,
-      });
+    // Hide modal and overlay on close button click
+    closeModal.addEventListener('click', () => {
+      modal.style.display = 'none';
+      overlay.style.display = 'none';
     });
 
-    // Log out user
-    document.getElementById("logout").addEventListener("click", () => {
-      auth0.logout({
-        returnTo: window.location.origin,
-      });
+    // Hide modal and overlay on clicking outside the modal
+    overlay.addEventListener('click', () => {
+      modal.style.display = 'none';
+      overlay.style.display = 'none';
     });
-
-    // Handle redirect callback
-    window.onload = async () => {
-      const query = window.location.search;
-      if (query.includes("code=") && query.includes("state=")) {
-        await auth0.handleRedirectCallback();
-        window.history.replaceState({}, document.title, "/");
-      }
-      updateUI();
-    };
   </script>
 </body>
 </html>
