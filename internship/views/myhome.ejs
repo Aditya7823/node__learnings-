@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include head partial for meta tags, styles, etc. -->
+    <%- include('./partials/head') %>
+
+    <!-- Add custom styles for employee layout -->
+    <style>
+        .employee-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .employee-row {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid #000000;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px #ddd;
+            margin: 15px 0;
+            padding: 20px;
+          
+           background-image: url('/images/grey.avif');
+        }
+
+
+        .employee-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+        }
+
+        .employee-details {
+            flex-grow: 1;
+        }
+
+        .employee-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .employee-description {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        body {
+            background-image: url('/images/image.png');
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+            padding: 8px 16px;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        @media (max-width: 767px) {
+            .employee-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .employee-img {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Include navigation partial for navbar or header -->
+    <%- include('./partials/nav') %>
+
+    <div class="d-flex">
+        <!-- Side Menu -->
+        <%- include('./partials/sidemenu') %>
+    
+        <!-- Employee Container -->
+        <div class="container mt-3 flex-grow-1">
+            <div class="employee-container" style="margin-left: 150px;">
+                <% employees.forEach(employee => { %>
+                    <div class="employee-row">
+                        <!-- Employee Image -->
+                        <img src="<%= employee.f_Image ? employee.f_Image : '/uploads/defaultemployeeimage.jpg' %>" alt="Employee Image" class="employee-img">
+                        
+                        <!-- Employee Details -->
+                        <div class="employee-details">
+                            <h5 class="employee-name"><%= employee.f_Name %></h5>
+                            <p class="employee-description">
+                                <strong>Email:</strong> <%= employee.f_Email %><br>
+                                <strong>Mobile:</strong> <%= employee.f_Mobile %><br>
+                                <strong>Designation:</strong> <%= employee.f_Designation %><br>
+                                <strong>Gender:</strong> <%= employee.f_Gender %><br>
+                                <strong>Course:</strong> <%= employee.f_Course || 'N/A' %><br>
+                                <strong>Joined:</strong> <%= employee.f_Createdate.toDateString() %>
+                               
+
+                            </p>
+                            
+                            <button class="btn btn-warning" onclick="window.location.href='/employee/edit/<%= employee.f_Id %>'">Edit</button>
+                            <button class="btn btn-danger"  onclick="deleteEmployee('<%= employee.f_Id %>')">Delete</button>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include scripts partial for JavaScript files -->
+    <%- include('./partials/scripts') %>
+
+    <script>
+        // Function to handle deletion of an employee
+        function deleteEmployee(employeeId) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                fetch(`/employee/${employeeId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Employee deleted successfully!');
+                        location.reload();
+                    } else {
+                        alert('Failed to delete employee.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the employee.');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

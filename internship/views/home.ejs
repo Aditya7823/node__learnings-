@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include head partial for meta tags, styles, etc. -->
+    <%- include('./partials/head') %>
+
+    <!-- Add custom styles for blog layout -->
+    <style>
+        /* Style for the card container */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 60px;
+            justify-content: center;
+        }
+
+        /* Each card style */
+        .card {
+            width: 100%; /* Default width (full width on small screens) */
+            max-width: 300px; /* Maximum width for cards */
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px  #ddd;
+            transition: transform 0.3s ease-in-out;
+            background-image: url('/images/grey.avif');
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #000000;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 8px 16px;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        /* Hover effect for cards */
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive design */
+        @media (min-width: 1200px) {
+            .card {
+                width: 30%; /* 3 cards per row for larger screens */
+            }
+        }
+
+        @media (max-width: 1199px) and (min-width: 768px) {
+            .card {
+                width: 45%; /* 2 cards per row for medium screens */
+            }
+        }
+
+        @media (max-width: 767px) {
+            .card {
+                width: 100%; /* 1 card per row for small screens */
+            }
+        }
+        /* General body styling */
+body {
+    background-color: #000; /* Black background */
+    color: #fff; /* White text */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Main welcome container styling */
+.welcome-container {
+    margin-top: 30px;
+    padding: 20px;
+}
+
+/* Heading styling */
+.welcome-heading {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Section styling */
+.section {
+    margin-top: 30px;
+}
+
+/* Section heading styling */
+.section-heading {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #bbb; /* Gray color */
+    text-transform: capitalize;
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* Section text styling */
+.section-text {
+    font-size: 1.2rem;
+    color: #ddd; /* Light gray */
+    line-height: 1.6;
+    animation: fadeIn 3s ease-in-out;
+}
+
+/* Highlighted text styling */
+.highlight-text {
+    color: #007bff; /* Blue for emphasis */
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Section animation delay */
+.section:nth-child(1) {
+    animation-delay: 0s;
+}
+.section:nth-child(2) {
+    animation-delay: 0.5s;
+}
+.section:nth-child(3) {
+    animation-delay: 1s;
+}
+.section:nth-child(4) {
+    animation-delay: 1.5s;
+}
+
+        body {
+    background-image: url('/images/okok.avif');
+    background-repeat: no-repeat;       /* Prevents the image from repeating */
+    background-size: cover;            /* Scales the image to cover the entire viewport */
+    background-position: center center; /* Centers the image both vertically and horizontally */
+    background-attachment: fixed;      /* Keeps the image fixed while scrolling */
+}
+
+    </style>
+</head>
+<body>
+    <!-- Include navigation partial for navbar or header -->
+    <%- include('./partials/nav') %>
+
+
+    <div class="d-flex">
+        <!-- Side Menu -->
+        <%- include('./partials/sidemenu') %>
+    
+        <!-- Blog Cards Container -->
+        <div class="container mt-3 flex-grow-1">
+            <!-- Welcome Section with Bold Headings -->
+            <div class="welcome-container" style="margin-left: 150px; text-align: center;">
+                <h1 class="welcome-heading">Welcome to DealsDray!</h1>
+                
+                <div class="section">
+                    <h3 class="section-heading">Who We Are</h3>
+                    <p class="section-text">
+                        We are thrilled to have you here at <strong class="highlight-text">DealsDray</strong>, a platform dedicated to bringing you the best deals and unbeatable offers across a wide range of products.
+                    </p>
+                </div>
+        
+                <div class="section">
+                    <h3 class="section-heading">What We Offer</h3>
+                    <p class="section-text">
+                        Explore exclusive discounts, tailored deals, and a wide selection of amazing offers, all designed to help you save more while enjoying top-quality products. No matter what you're looking for, you'll find the best deal with us!
+                    </p>
+                </div>
+        
+                <div class="section">
+                    <h3 class="section-heading">Why Choose Us?</h3>
+                    <p class="section-text">
+                        At <strong class="highlight-text">DealsDray</strong>, we are committed to making your experience seamless and rewarding. We go the extra mile to provide you with personalized offers that truly match your needs. Whether it's big savings on your favorite brands or discovering new products, you can trust us to deliver the best deals right to your fingertips.
+                    </p>
+                </div>
+        
+                <div class="section">
+                    <h3 class="section-heading">Thank You for Joining Us!</h3>
+                    <p class="section-text">
+                        Thank you for choosing <strong class="highlight-text">DealsDray</strong>. We look forward to helping you discover the best deals and offers that will make your shopping experience even more enjoyable. Stay tuned for exciting new deals coming your way!
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+</div>
+
+    
+
+    <!-- Include scripts partial for JavaScript files -->
+    <%- include('./partials/scripts') %>
+    <script>
+
+
+
+        function toggleBlogBody(blogId) {
+            const blogBody = document.getElementById(`blog-body-${blogId}`);
+            const button = document.getElementById(`toggle-btn-${blogId}`);
+
+            if (blogBody.style.maxHeight === "none") {
+                // Collapse the body
+                blogBody.style.maxHeight = "50px";  // Adjust this value to your desired collapsed height
+                blogBody.style.overflow = "hidden";
+                button.textContent = "Read More";  // Change button text back to 'Read More'
+            } else {
+                // Expand the body to show full text
+                blogBody.style.maxHeight = "none";  // Remove max height to show full text
+                blogBody.style.overflow = "visible";
+                button.textContent = "Compress";  // Change button text to 'Compress'
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Employee - Employee Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url('/images/back2.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+            color: #f8f9fa;
+        }
+        .form-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(235, 232, 232, 0.9);
+            margin: 50px auto;
+            max-width: 700px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-label {
+            color: #dfdfdf;
+        }
+        .form-control {
+            background-color: #2c2c2c;
+            color: #f8f9fa;
+            border: 1px solid #a7a7a7;
+        }
+        .form-control:focus {
+            border-color: #c9c9c9;
+            box-shadow: 0 0 5px #ffffff;
+        }
+        .btn-primary {
+            background-color: #ffffff;
+            color: black;
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #eaeaea;
+        }
+        .page-title {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+        .employee-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #fff;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('./partials/nav') %>
+    <%- include('./partials/sidemenu') %>
+    
+    <div class="container mt-3 flex-grow-1">
+        <div class="employee-container" style="margin-left: 150px;">
+            <div class="container">
+                <!-- Employee Image -->
+                <div class="text-center">
+                    <img src="<%= employee.f_Image %>" alt="Employee Image" class="employee-img">
+                </div>
+                
+                <h2 class="page-title">Edit Employee</h2>
+                <!-- Ensure enctype="multipart/form-data" for file uploads -->
+                <form action="/employee/update/<%= employee.f_Id %>" method="POST" enctype="multipart/form-data">
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label for="f_Name" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="f_Name" name="f_Name" value="<%= employee.f_Name %>" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="f_Email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="f_Email" name="f_Email" value="<%= employee.f_Email %>" required>
+                    </div>
+
+                    <!-- Mobile -->
+                    <div class="mb-3">
+                        <label for="f_Mobile" class="form-label">Mobile:</label>
+                        <input type="text" class="form-control" id="f_Mobile" name="f_Mobile" value="<%= employee.f_Mobile %>" required>
+                    </div>
+
+                    <!-- Designation -->
+                    <div class="mb-3">
+                        <label for="f_Designation" class="form-label">Designation:</label>
+                        <input type="text" class="form-control" id="f_Designation" name="f_Designation" value="<%= employee.f_Designation %>" required>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="mb-3">
+                        <label for="f_Gender" class="form-label">Gender:</label>
+                        <input type="text" class="form-control" id="f_Gender" name="f_Gender" value="<%= employee.f_Gender %>" required>
+                    </div>
+
+                    <!-- Course -->
+                    <div class="mb-3">
+                        <label for="f_Course" class="form-label">Course:</label>
+                        <input type="text" class="form-control" id="f_Course" name="f_Course" value="<%= employee.f_Course %>">
+                    </div>
+
+                    <!-- Created Date -->
+                    <div class="mb-3">
+                        <label for="f_Createdate" class="form-label">Creation Date:</label>
+                        <input type="text" class="form-control" id="f_Createdate" name="f_Createdate" value="<%= employee.f_Createdate %>" readonly>
+                    </div>
+
+                    <!-- Timestamps (createdAt, updatedAt) -->
+                    <div class="mb-3">
+                        <label for="f_Timestamps" class="form-label">Timestamps:</label>
+                        <input type="text" class="form-control" id="f_Timestamps" name="f_Timestamps" value="Created: <%= employee.createdAt %> | Updated: <%= employee.updatedAt %>" readonly>
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="mb-3">
+                        <label for="f_Image" class="form-label">Change Image:</label>
+                        <input type="file" class="form-control" id="f_Image" name="f_Image">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100">Update</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <%- include('./partials/scripts') %>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('./partials/head') %>
+    <style>
+        body{
+            background-image: url(/images/backnew.avif);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            background-color: #fff;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #000;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .search-form {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .search-form input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('./partials/nav') %>
+    <%- include('./partials/sidemenu') %>
+
+    <div class="container">
+        <h1 class="text-center">Search Employees</h1>
+
+        <!-- Search form -->
+        <form class="search-form" id="search-form">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Search by ID, Name, or Email"
+                aria-label="Search"
+            />
+        </form>
+
+        <!-- Placeholder for search results -->
+        <div class="card-container" id="results-container"></div>
+    </div>
+
+    <%- include('./partials/scripts') %>
+
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const resultsContainer = document.getElementById('results-container');
+
+        // Function to render employee cards
+        function renderCards(employees) {
+            resultsContainer.innerHTML = ''; // Clear previous results
+            if (employees.length === 0) {
+                resultsContainer.innerHTML = '<p>No results found</p>';
+                return;
+            }
+
+            employees.forEach(employee => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${employee.f_Name}</h5>
+                        <p class="card-text">ID: ${employee.f_Id}</p>
+                        <p class="card-text">Email: ${employee.f_Email}</p>
+                        <p class="card-text">Mobile: ${employee.f_Mobile}</p>
+                        <p class="card-text">Designation: ${employee.f_Designation}</p>
+                    </div>
+                `;
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        // Function to fetch search results from the backend
+        async function fetchSearchResults(query) {
+            try {
+                const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
+                if (response.ok) {
+                    const employees = await response.json();
+                    renderCards(employees);
+                } else {
+                    console.error('Error fetching search results');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Function to fetch all employees initially
+        async function fetchAllEmployees() {
+            try {
+                const response = await fetch('/search'); // No query parameter for all employees
+                if (response.ok) {
+                    const employees = await response.json();
+                    renderCards(employees);
+                } else {
+                    console.error('Error fetching employees');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Initial fetch of all employees when the page loads
+        fetchAllEmployees();
+
+        // Event listener for search input
+        searchInput.addEventListener('input', (event) => {
+            const query = event.target.value.trim();
+            if (query) {
+                fetchSearchResults(query); // Fetch filtered employees
+            } else {
+                fetchAllEmployees(); // Fetch all employees when search is cleared
+            }
+        });
+    </script>
+</body>
+</html>
