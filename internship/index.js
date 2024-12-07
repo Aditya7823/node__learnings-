@@ -65,28 +65,28 @@ app.get('/search', async (req, res) => {
   });
   
   // Route to get all employees or filtered employees based on the search query
-app.get('/search', async (req, res) => {
-    try {
-        const query = req.query.query || ''; // If no query is provided, return all employees
+// app.get('/search', async (req, res) => {
+//     try {
+//         const query = req.query.query || ''; // If no query is provided, return all employees
 
-        let filter = {};
-        if (query) {
-            filter = {
-                $or: [
-                    { f_Id: { $regex: query, $options: 'i' } },
-                    { f_Name: { $regex: query, $options: 'i' } },
-                    { f_Email: { $regex: query, $options: 'i' } }
-                ]
-            };
-        }
+//         let filter = {};
+//         if (query) {
+//             filter = {
+//                 $or: [
+//                     { f_Id: { $regex: query, $options: 'i' } },
+//                     { f_Name: { $regex: query, $options: 'i' } },
+//                     { f_Email: { $regex: query, $options: 'i' } }
+//                 ]
+//             };
+//         }
 
-        const employees = await Employee.find(filter);
-        res.json(employees);
-    } catch (error) {
-        console.error('Error fetching employees:', error);
-        res.status(500).send('Server error');
-    }
-});
+//         const employees = await Employee.find(filter);
+//         res.render("search",employees);
+//     } catch (error) {
+//         console.error('Error fetching employees:', error);
+//         res.status(500).send('Server error');
+//     }
+// });
 
 
 app.get('/landing', (req, res) => {
