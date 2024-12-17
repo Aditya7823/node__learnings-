@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const app = express();
+const Follow = require("./models/Follow");
 const userRouter = require('./routes/user');
 const blogRouter = require('./routes/blog');
 const Blog = require('./models/blog'); // Correct import
@@ -37,6 +38,12 @@ app.use((req, res, next) => {
     next();
 });
 
+
+
+
+
+
+
 // Serve static files
 app.use(express.static('public'));
 
@@ -45,6 +52,63 @@ app.use(cookieParser());
 
 // Authentication middleware
 app.use(checkForAuthenticationCookie());
+
+// thus the comment graph 
+
+app.get("/followers", async (req, res) => {
+    try {
+        const userId = req.user._id; // Assuming `req.user` has the current logged-in user's info
+    
+        const followers = await Follow.find({ following: userId })
+            .populate("follower", "fullname email profileImageUrl")
+            .exec();
+
+        res.status(200).json({
+            message: "Followers fetched successfully",
+            followers,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+
+app.get('/stats', async (req, res) => {
+    try {
+        // Aggregating blogs and their associated comments
+        const blogComments = await Blog.aggregate([
+            {
+                $lookup: {
+                    from: 'comments', // Ensure 'comments' is the correct collection name
+                    localField: '_id',
+                    foreignField: 'blogId',
+                    as: 'comments'
+                }
+            },
+            {
+                $project: {
+                    title: 1,
+                    commentCount: { $size: '$comments' }
+                }
+            }
+        ]);
+
+        // Check if blogComments is being passed correctly
+        console.log(blogComments);  // Add this line to check if data is fetched properly
+
+        res.render('commentsGraph', { blogComments }); // Rendering EJS with blogComments
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+
+
+
+
 
 
 
@@ -338,27 +402,99 @@ app.get('/', async (req, res) => {
 
     try {
         let allBlogs;
+        let followedAuthors = [];
 
+        // Fetch all blogs based on the search query
         if (title) {
-            // Find all blogs and filter by title using JavaScript array filter
             allBlogs = await Blog.find({});
             allBlogs = allBlogs.filter(blog => blog.title.toLowerCase().includes(title.toLowerCase()));
             console.log(allBlogs);
         } else {
-            // Fetch all blogs if no title search query is provided
             allBlogs = await Blog.find({});
+        }
+
+        // Get the current user ID from req.user (assumes user is logged in and req.user is set)
+        const userId = req.user._id;
+
+        // Query the Follow collection to get the list of followed authors for the current user
+        const followingList = await Follow.find({ follower: userId }).populate('following', 'fullname _id profileImageUrl');
+
+        // Extract the authors (following users)
+        followedAuthors = followingList.map(follow => follow.following);
+
+        // Optionally, handle the case where no users are followed
+        if (followedAuthors.length === 0) {
+            console.log('User is not following anyone');
         }
 
         console.log("Home route accessed with title:", title);
         res.render("home", {
             user: req.user,
             blogs: allBlogs, // Pass the filtered blogs to the home view
+            followedAuthors // Pass the set of authors the user is following
         });
     } catch (error) {
         console.error("Error fetching blogs:", error);
         res.status(500).send("An error occurred while loading the home page.");
     }
 });
+
+
+//flooow functionality 
+
+
+
+
+
+
+app.post("/follow/:authorId", async (req, res) => {
+    try {
+        const { authorId } = req.params; // Get the author ID from the route parameters
+        const { currentUserId } = req.body; // Get the current user ID from the request body
+
+        // Check if the current user is trying to follow themselves
+        if (currentUserId === authorId) {
+            return res.status(400).json({ message: "You cannot follow yourself." });
+        }
+
+        // Check if the follow relationship already exists
+        const existingFollow = await Follow.findOne({ follower: currentUserId, following: authorId });
+        if (existingFollow) {
+            return res.status(400).json({ message: "You are already following this user." });
+        }
+
+        // Create a new follow relationship
+        const newFollow = new Follow({
+            follower: currentUserId,
+            following: authorId,
+        });
+
+        await newFollow.save();
+
+        return res.status(200).json({ message: "Followed successfully!" });
+    } catch (error) {
+        console.error("Error following user:", error);
+        return res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
