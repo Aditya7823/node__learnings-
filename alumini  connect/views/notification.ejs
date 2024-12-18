@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications</title>
+    <!-- Bootstrap CSS -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    />
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+        rel="stylesheet"
+    />
+</head>
+<body>
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">Your Notifications</h2>
+
+        <!-- Notifications Section -->
+        <div class="list-group">
+            <% if (notifications && notifications.length > 0) { %>
+                <% notifications.forEach((notification) => { %>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <!-- Notification Content with Icons -->
+                        <div>
+                            <% if (notification.message.includes('started following you')) { %>
+                                <!-- Follower Icon -->
+                                <i class="bi bi-person-plus me-2 text-primary"></i>
+                            <% } else if (notification.message.includes('You are now following')) { %>
+                                <!-- Following Icon -->
+                                <i class="bi bi-person-check me-2 text-success"></i>
+                            <% } %>
+                            <strong><%= notification.sender.fullname %></strong>
+                            <%= notification.message %>
+                        </div>
+                        <!-- Timestamp -->
+                        <small class="text-muted">
+                            <%= new Date(notification.createdAt).toLocaleString() %>
+                        </small>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <!-- No Notifications -->
+                <div class="alert alert-info text-center">
+                    You don't have any notifications yet!
+                </div>
+            <% } %>
+        </div>
+
+        <!-- Back to Home Button -->
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Go Back to Home</a>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
+    ></script>
+</body>
+</html>

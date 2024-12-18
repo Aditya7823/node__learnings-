@@ -9,6 +9,7 @@ const Follow = require("./models/Follow");
 const userRouter = require('./routes/user');
 const blogRouter = require('./routes/blog');
 const Blog = require('./models/blog'); // Correct import
+const Notification = require("./models/notification");// Correct import
 const Comment = require('./models/blog'); // Correct import
 const User = require('./models/user'); // Correct import
 const cors = require("cors");
@@ -55,23 +56,6 @@ app.use(checkForAuthenticationCookie());
 
 // thus the comment graph 
 
-app.get("/followers", async (req, res) => {
-    try {
-        const userId = req.user._id; // Assuming `req.user` has the current logged-in user's info
-    
-        const followers = await Follow.find({ following: userId })
-            .populate("follower", "fullname email profileImageUrl")
-            .exec();
-
-        res.status(200).json({
-            message: "Followers fetched successfully",
-            followers,
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Server error" });
-    }
-});
 
 
 app.get('/stats', async (req, res) => {
@@ -447,10 +431,12 @@ app.get('/', async (req, res) => {
 
 
 
+ // Import the notification model
+
 app.post("/follow/:authorId", async (req, res) => {
     try {
-        const { authorId } = req.params; // Get the author ID from the route parameters
-        const { currentUserId } = req.body; // Get the current user ID from the request body
+        const { authorId } = req.params; // Get the author ID (the user being followed)
+        const { currentUserId } = req.body; // Get the current user ID (the follower)
 
         // Check if the current user is trying to follow themselves
         if (currentUserId === authorId) {
@@ -471,12 +457,24 @@ app.post("/follow/:authorId", async (req, res) => {
 
         await newFollow.save();
 
-        return res.status(200).json({ message: "Followed successfully!" });
+        // Send a notification to the followed user
+        const notificationMessage = `User  has started following you.`;
+
+        const newNotification = new Notification({
+            sender: currentUserId,
+            receiver: authorId,
+            message: notificationMessage,
+        });
+
+        await newNotification.save();
+
+        return res.status(200).json({ message: "Followed successfully and notification sent!" });
     } catch (error) {
         console.error("Error following user:", error);
         return res.status(500).json({ message: "Internal server error." });
     }
 });
+
 
 
 
@@ -562,6 +560,49 @@ app.post("/send", async (req, res) => {
         res.status(500).json({ error: "Failed to send email. Please try again later." });
     }
 });
+
+
+
+
+// notification fetch and showing  phase 
+
+
+app.get("/notifications/:userId", async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Fetch notifications for the user and populate sender details
+        const notifications = await Notification.find({ receiver: userId })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
+        // Render the notifications view, passing the notifications data
+        res.render("notification", { notifications });
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).send("Internal server error.");
+    }
+});
+
+//followers   gate away 
+app.get("/followers", async (req, res) => {
+    try {
+        const userId = req.user._id; // Assuming `req.user` contains the logged-in user's info
+
+        // Fetch followers for the current user
+        const followers = await Follow.find({ following: userId })
+            .populate("follower", "fullname email profileImageUrl") // Populate follower details
+            .exec();
+
+        // Render the followers.ejs view, passing the followers list
+        res.render("followers", {  user: req.user,followers });
+    } catch (err) {
+        console.error("Error fetching followers:", err);
+        res.status(500).send("Internal server error.");
+    }
+});
+
+
 
 
 // Start the server

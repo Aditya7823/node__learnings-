@@ -1,18 +1,38 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+
+
 <div class="side-menu" id="sideMenu">
     <div class="side-menu-header">
 
         <% if (user) { %>
-            <div class="user-profile">
+            <!-- Profile Section -->
+            <div class="d-flex align-items-center mb-3">
                 <img 
                     src="<%= user.profileImageUrl || '/images/profile.png' %>" 
                     alt="Profile" 
-                    width="50" 
-                    height="50" 
+                    width="70" 
+                    height="70" 
                     class="rounded-circle"
                     onerror="this.src='/images/default-profile.png';" 
                 >
-                <span class="ms-2"><%= user.fullname || 'Guest' %></span>
+                <span class="ms-3 fs-5 fw-bold"><%= user.fullname || 'Guest' %></span>
             </div>
+        
+            <!-- Followers and Followings Section -->
+            <div class="d-flex justify-content-between mt-3">
+                <a href="/followers" class="text-decoration-none text-center w-50 me-2">
+                    <i style="color: rgb(133, 133, 133);" class="bi bi-person-plus fs-4"></i>
+                    <div style="color: rgb(133, 133, 133);">Followers</div>
+                </a>
+                <a href="/followings/<%= user._id %>" class="text-decoration-none text-center w-50">
+                    <i  style="color: rgb(133, 133, 133);"class="bi bi-person-check fs-4"></i>
+                    <div style="color: rgb(133, 133, 133);">Followings</div>
+                </a>
+            </div>
+        
+        
+        
         <% }
         else { %>
             <div class="user-profile">

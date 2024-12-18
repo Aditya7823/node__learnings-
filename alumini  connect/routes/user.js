@@ -1,6 +1,8 @@
 const express = require('express');
 const User = require('../models/user');
 const Blog = require('../models/blog');
+const Follow = require('../models/Follow');
+const sendWelcomeEmail = require('../notifications/welcome');
 const router = express.Router();
 
 router.get('/signin', (req, res) => {
@@ -40,18 +42,20 @@ router.post('/signup', async (req, res) => {
             role: "USER"
         });
 
+        // Send the welcome email
+        await sendWelcomeEmail(email, fullname);
+
         // Fetch all blogs
-        const allBlogs = await Blog.find({}); 
-
-        // Log a message for debugging
-        console.log("Home route accessed");
-
-        // Render the 'home' page, passing both the user and the blogs
-        res.render("home", {
-            user: newUser, // Pass the newly created user
-            blogs: allBlogs // Pass the list of blogs
-        });
+        const allBlogs = await Blog.find({});
     
+
+
+        
+        // Optionally, handle the case where no users are followed
+       
+
+       
+        res.redirect("/user/signin");
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).send("Internal Server Error");
