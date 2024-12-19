@@ -95,51 +95,130 @@
     <!-- Include navigation partial for navbar or header -->
     <%- include('./partials/nav') %>
 
-
-    <div class="d-flex">
-        <!-- Side Menu -->
-        <%- include('./partials/sidemenu') %>
+<div class="d-flex">
+    <!-- Side Menu -->
+    <%- include('./partials/sidemenu') %>
     
-        <!-- Blog Cards Container -->
-        <div class="container mt-3 flex-grow-1">
-            <!-- Loop through all blogs and display them as Bootstrap cards -->
-            <div class="card-container" style="margin-left: 150px;">
-                <% blogs.forEach(blog => { %>
-                    <div class="card mb-3" onclick="window.location.href='/blog/<%= blog._id %>?user=<%= user || null %>'">
-                        <img src="<%= blog.coverImageURL ? blog.coverImageURL : '/uploads/defaultblogimage.jpg' %>" class="card-img-top" alt="Cover Image">
-                        <div class="card-body">
-        
-                            <h5 class="card-title"><%= blog.title %></h5>
-                            
-                            <!-- Conditionally render Follow/Following button based on whether the current user is following the author -->
-                            <button class="btn btn-primary follow-btn" 
-                                    onclick="followUser('<%= blog.createdBy._id %>', '<%= user._id %>')">
-                                <% 
-                                    // Check if the current blog's author is in the followedAuthors set
-                                    const isFollowing = followedAuthors.some(author => author._id.toString() === blog.createdBy.toString());
-                                %>
-                                <%= isFollowing ? 'Following' : 'Follow' %>
-                            </button>
-        
-                            <p class="card-text" id="blog-body-<%= blog._id %>" style="max-height: 50px; overflow: hidden;">
-                                <%= blog.body.split(' ').slice(0, 15).join(' ') %><%= blog.body.split(' ').length > 15 ? '...' : '' %>
-                            </p>
-        
-                            <button class="btn btn-primary" id="toggle-btn-<%= blog._id %>" onclick="toggleBlogBody('<%= blog.createdBy %>', '<%= blog.body %>')">
-                                <%= 'Read More' %>
-                            </button>
-                        </div>
+    <!-- Blog Cards Container -->
+    <div class="container mt-3 flex-grow-1">
+        <!-- Loop through all blogs and display them as Bootstrap cards -->
+        <div class="card-container" style="margin-left: 150px;">
+            <% blogs.forEach(blog => { %>
+                <div class="card mb-3">
+                    <img src="<%= blog.coverImageURL ? blog.coverImageURL : '/uploads/defaultblogimage.jpg' %>" class="card-img-top" alt="Cover Image">
+                    <div class="card-body">
+                        
+                        <h5 class="card-title"><%= blog.title %></h5>
+                        
+                        <!-- Simple blue text for Follow/Following -->
+                       
+                        <p class="card-text" id="blog-body-<%= blog._id %>" style="max-height: 50px; overflow: hidden;">
+                            <%= blog.body.split(' ').slice(0, 15).join(' ') %><%= blog.body.split(' ').length > 15 ? '...' : '' %>
+                        </p>
+                        
+                        <button class="btn btn-primary" id="toggle-btn-<%= blog._id %>"  onclick="window.location.href='/blog/<%= blog._id %>?user=<%= user || null %>'" style="background-color: rgb(0, 0, 0);">
+                            <%= 'Read More' %>
+                        </button>
+                        
+                        <!-- Like Option -->
+                        <span class="text-primary like-option" 
+                              onclick="likeBlog('<%= blog._id %>', '<%= user ? user._id : null %>')"
+                              style="cursor: pointer; font-weight: bold;">
+    <!-- Conditional check for like status: filled heart (red) or empty heart (white) -->
+                               <i class="bi <%= likedBlogs.includes(blog._id.toString()) ? 'bi-heart-fill' : 'bi-heart' %>" 
+                                 id="like-icon-<%= blog._id %>" 
+                                      style="color: <%= likedBlogs.includes(blog._id.toString()) ? 'red' : 'white' %>; 
+                                         -webkit-text-stroke: <%= likedBlogs.includes(blog._id.toString()) ? '0' : '1px red' %>;">
+   
+
+
+                   </i>    
+
+    
+    <!-- Display the like count -->
+    <span style="color: white;" id="like-count-<%= blog._id %>">
+        <%= likeCountMap[blog._id.toString()] || 0 %>
+    </span>
+</span>
+
+</span>
+<br>
+<p class="text-primary follow-text" 
+onclick="followUser('<%= blog.createdBy._id %>', '<%= user._id %>')"
+style="cursor: pointer; font-weight: bold; margin-top: 5px;">
+ <% 
+     // Check if the current blog's author is in the followedAuthors set
+     const isFollowing = followedAuthors.some(author => author._id.toString() === blog.createdBy.toString());
+ %>
+ <%= isFollowing ? 'Following' : 'Follow' %>
+</p>
+
+
+
                     </div>
-                <% }) %>
-            </div>
+                </div>
+            <% }) %>
         </div>
-        
     </div>
+</div>
+
+    
     
 
     <!-- Include scripts partial for JavaScript files -->
     <%- include('./partials/scripts') %>
     <script>
+    async function likeBlog(blogId, userId) {
+    if (!userId) {
+        alert("You must be logged in to like a blog!");
+        return;
+    }
+
+    try {
+        // Send POST request to like/unlike the blog
+        const response = await fetch(`/blog/${blogId}/like`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ userId }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // Update the like count and toggle the heart color
+            const likeCountElement = document.getElementById(`like-count-${blogId}`);
+            const likeIconElement = document.getElementById(`like-icon-${blogId}`);
+
+            // Update the like count
+            likeCountElement.textContent = data.likes;
+
+            // Toggle the heart icon color based on the like status
+            if (likeIconElement.classList.contains("bi-heart")) {
+                likeIconElement.classList.remove("bi-heart");
+                likeIconElement.classList.add("bi-heart-fill");
+                likeIconElement.style.color = "red"; // Change heart to red if liked
+            } else {
+                likeIconElement.classList.remove("bi-heart-fill");
+                likeIconElement.classList.add("bi-heart");
+                likeIconElement.style.color = "white"; // Change heart back to white if unliked
+            }
+        } else {
+            alert(data.message || "Something went wrong!");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Failed to like the blog. Please try again.");
+    }
+}
+
+
+
+
+
+
+
 function followUser(authorId, currentUserId) {
     if (!currentUserId) {
         alert('You need to log in to follow users.');

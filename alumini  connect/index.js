@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 const Follow = require("./models/Follow");
+const Like = require("./models/Like");
 const userRouter = require('./routes/user');
 const blogRouter = require('./routes/blog');
 const Blog = require('./models/blog'); // Correct import
@@ -60,6 +61,10 @@ app.use(checkForAuthenticationCookie());
 
 app.get('/stats', async (req, res) => {
     try {
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
         // Aggregating blogs and their associated comments
         const blogComments = await Blog.aggregate([
             {
@@ -81,7 +86,7 @@ app.get('/stats', async (req, res) => {
         // Check if blogComments is being passed correctly
         console.log(blogComments);  // Add this line to check if data is fetched properly
 
-        res.render('commentsGraph', { blogComments }); // Rendering EJS with blogComments
+        res.render('commentsGraph', { blogComments ,notifications}); // Rendering EJS with blogComments
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -100,20 +105,48 @@ app.get('/landing', (req, res) => {
     res.render("landing");
 });
 
-app.get('/contact', (req, res) => {
-    res.render("contact",{ user: req.user});
-});
+app.get('/contact', async(req, res) => {
+    const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
-app.get('/about', (req, res) => {
-    res.render("about",{ user: req.user});
+    res.render("contact",{ user: req.user,notifications});
+});
+app.get('/about', async(req, res) => {
+    const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
+    res.render("about",{ user: req.user,notifications});
 });
 app.get('/generate', (req, res) => {
     res.render("generate",{ user: req.user});
 });
 
 
-app.get('/profile', (req, res) => {
+app.put('/notifications/:id/mark-read', async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+
+        // Update the `isRead` status of the notification to true
+        await Notification.findByIdAndUpdate(notificationId, { isRead: true });
+
+        res.status(200).json({ message: 'Notification marked as read.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to mark notification as read.' });
+    }
+});
+
+app.get('/profile', async (req, res) => {
     // Simulating profile accessed data (replace with your actual user-fetching logic)
+
+
+    const notifications = await Notification.find({ receiver: req.user._id })
+    .sort({ createdAt: -1 }) // Sort by most recent
+    .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
+
     const user = req.user || {
         fullname: 'Guest',
         email: null,
@@ -127,7 +160,8 @@ app.get('/profile', (req, res) => {
             email: user.email,
             profileImageUrl: user.profileImageUrl || '/images/default-profile.png', // Fallback image
             role: user.role,
-        }
+        },
+        notifications
     });
 });
 //the generate google api post
@@ -188,6 +222,7 @@ app.get('/blog/edit/:id', async (req, res) => {
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 const multer = require('multer');
+const notification = require("./models/notification");
 
 
 // Configure Multer for file uploads
@@ -249,6 +284,10 @@ app.post('/edit/:id', upload.single('coverImage'), async (req, res) => {
 //oomments and blogs
 app.get('/comments', async (req, res) => {
     try {
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
         // Find all blogs created by the current user
         const blogs = await Blog.find({ createdBy: req.user._id })
             .populate('createdBy', 'fullname') // Populate blog author details
@@ -267,7 +306,8 @@ app.get('/comments', async (req, res) => {
         // Render the comments.ejs template with blogs and comments
         res.render('comments', {
             blogs: blogsWithComments,
-            user: req.user, // Current logged-in user
+            user: req.user,
+            notifications // Current logged-in user
         });
     } catch (error) {
         console.error('Error fetching blogs and comments:', error);
@@ -279,7 +319,11 @@ app.get('/comments', async (req, res) => {
 // GET route to render settings page
 app.get('/settings', async (req, res) => {
     try {
-        res.render('settings', { user: req.user || null }); // Pass the user object or null
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
+        res.render('settings', { user: req.user || null ,notifications}); // Pass the user object or null
     } catch (error) {
         console.error('Error fetching user data:', error);
         res.status(500).send('Error loading settings page');
@@ -289,6 +333,10 @@ app.get('/settings', async (req, res) => {
 
 app.post('/settings', upload.single('profileImageUrl'), async (req, res) => {
     try {
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
         const { fullname, email } = req.body;
         const profileImageUrl = req.file ? `/uploads/profileImages/${req.file.filename}` : null;
 
@@ -326,7 +374,7 @@ app.post('/settings', upload.single('profileImageUrl'), async (req, res) => {
         await user.save();
         
         // Redirect back to settings page with updated profile
-        res.redirect('/profile');
+        res.redirect('/profile',{notifications});
     } catch (error) {
         console.error('Error updating profile:', error);
         res.status(500).send('Internal server error. Please try again later.');
@@ -348,6 +396,9 @@ app.get('/myhome', async (req, res) => {
 
     try {
         let allBlogs;
+        const notifications = await Notification.find({ receiver: req.user._id })
+        .sort({ createdAt: -1 }) // Sort by most recent
+        .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
         if (!req.user) {
             // If no user is logged in, display a guest message or an empty blog list
@@ -372,7 +423,8 @@ app.get('/myhome', async (req, res) => {
         console.log("Home route accessed with title:", title);
         res.render("myhome", {
             user: req.user, // Pass the current user to the view
-            blogs: allBlogs, // Pass the filtered blogs to the view
+            blogs: allBlogs,
+            notifications // Pass the filtered blogs to the view
         });
     } catch (error) {
         console.error("Error fetching blogs:", error);
@@ -381,10 +433,19 @@ app.get('/myhome', async (req, res) => {
 });
 
 // Home route
+
+
+
+
 app.get('/', async (req, res) => {
     const { title } = req.query; // Extract 'title' from query parameters
 
     try {
+        // Fetch notifications for the logged-in user
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+
         let allBlogs;
         let followedAuthors = [];
 
@@ -397,31 +458,83 @@ app.get('/', async (req, res) => {
             allBlogs = await Blog.find({});
         }
 
-        // Get the current user ID from req.user (assumes user is logged in and req.user is set)
-        const userId = req.user._id;
+        const userId = req.user._id; // Get the current user's ID
 
-        // Query the Follow collection to get the list of followed authors for the current user
+        // Fetch the list of users the current user is following
         const followingList = await Follow.find({ follower: userId }).populate('following', 'fullname _id profileImageUrl');
 
         // Extract the authors (following users)
         followedAuthors = followingList.map(follow => follow.following);
 
-        // Optionally, handle the case where no users are followed
+        // Fetch liked blog IDs for the current user
+        let likedBlogs = [];
+        likedBlogs = await Like.find({ user: userId }).select("blog").lean();
+        likedBlogs = likedBlogs.map(like => like.blog.toString()); // Get an array of liked blog IDs
+
+        // Create a hashmap of like counts for each blog
+        let likeCountMap = {};
+        const allLikes = await Like.find({}).lean(); // Fetch all likes from the database
+        allLikes.forEach(like => {
+            if (likeCountMap[like.blog]) {
+                likeCountMap[like.blog] += 1; // Increment like count for the blog
+            } else {
+                likeCountMap[like.blog] = 1; // Initialize like count if it doesn't exist
+            }
+        });
+
         if (followedAuthors.length === 0) {
             console.log('User is not following anyone');
         }
 
         console.log("Home route accessed with title:", title);
+        
+        // Render the home view with additional data
         res.render("home", {
             user: req.user,
             blogs: allBlogs, // Pass the filtered blogs to the home view
-            followedAuthors // Pass the set of authors the user is following
+            followedAuthors,
+            notifications, // Pass the set of authors the user is following
+            likedBlogs, // Pass the liked blogs IDs to the frontend
+            likeCountMap // Pass the like count map to the frontend
         });
     } catch (error) {
         console.error("Error fetching blogs:", error);
         res.status(500).send("An error occurred while loading the home page.");
     }
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //flooow functionality 
@@ -435,6 +548,10 @@ app.get('/', async (req, res) => {
 
 app.post("/follow/:authorId", async (req, res) => {
     try {
+       
+      
+
+        
         const { authorId } = req.params; // Get the author ID (the user being followed)
         const { currentUserId } = req.body; // Get the current user ID (the follower)
 
@@ -452,7 +569,7 @@ app.post("/follow/:authorId", async (req, res) => {
         // Create a new follow relationship
         const newFollow = new Follow({
             follower: currentUserId,
-            following: authorId,
+            following: authorId
         });
 
         await newFollow.save();
@@ -569,15 +686,19 @@ app.post("/send", async (req, res) => {
 
 app.get("/notifications/:userId", async (req, res) => {
     try {
+        
         const { userId } = req.params;
+        const notifications = await Notification.find({ receiver: req.user._id })
+        .sort({ createdAt: -1 }) // Sort by most recent
+        .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
         // Fetch notifications for the user and populate sender details
-        const notifications = await Notification.find({ receiver: userId })
+        const n = await Notification.find({ receiver: userId })
             .sort({ createdAt: -1 }) // Sort by most recent
             .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
         // Render the notifications view, passing the notifications data
-        res.render("notification", { notifications });
+        res.render("notification", { n, user:req.user, notifications});
     } catch (error) {
         console.error("Error fetching notifications:", error);
         res.status(500).send("Internal server error.");
@@ -588,6 +709,10 @@ app.get("/notifications/:userId", async (req, res) => {
 app.get("/followers", async (req, res) => {
     try {
         const userId = req.user._id; // Assuming `req.user` contains the logged-in user's info
+       
+        const notifications = await Notification.find({ receiver: userId })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
         // Fetch followers for the current user
         const followers = await Follow.find({ following: userId })
@@ -595,15 +720,70 @@ app.get("/followers", async (req, res) => {
             .exec();
 
         // Render the followers.ejs view, passing the followers list
-        res.render("followers", {  user: req.user,followers });
+        res.render("followers", {  user: req.user,followers ,notifications });
     } catch (err) {
         console.error("Error fetching followers:", err);
         res.status(500).send("Internal server error.");
     }
 });
+//followings route or gateaway 
+app.get("/followings/:userId", async (req, res) => {
+    try {
+        const userId = req.params.userId;
+      
 
+        const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
+        // Fetch the followings where the current user is the follower
+        const followings = await Follow.find({ follower: userId })
+            .populate("following", "fullname email profileImageUrl")
+            .exec();
 
+        res.render("followings", {
+            followings,
+            user:req.user,
+            notifications
+             // Pass the followings list to the frontend
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+//route to like  a  blog 
+
+app.post("/blog/:id/like", async (req, res) => {
+    try {
+        const blogId = req.params.id;
+        const userId = req.body.userId;
+
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not logged in" });
+        }
+
+        // Check if the user already liked the blog
+        const existingLike = await Like.findOne({ blog: blogId, user: userId });
+
+        if (existingLike) {
+            // User already liked, so unlike
+            await Like.deleteOne({ _id: existingLike._id });
+        } else {
+            // User has not liked yet, so create a new like
+            await Like.create({ blog: blogId, user: userId });
+        }
+
+        // Get updated like count
+        const likeCount = await Like.countDocuments({ blog: blogId });
+
+        res.status(200).json({ success: true, likes: likeCount });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
+});
 
 // Start the server
 const port = process.env.PORT || 8000;

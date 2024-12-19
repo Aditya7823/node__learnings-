@@ -3,15 +3,22 @@ const router = Router();
 const multer = require('multer');
 const Blog = require('../models/blog'); // Import the Blog model
 const Comment = require('../models/comment'); // Import the Blog model
+const Notification = require('../models/notification'); // Import the Blog model
 const upload = multer({ dest: 'uploads/' });
-router.get('/add-blog', (req, res) => {
+router.get('/add-blog', async(req, res) => {
+      const notifications = await Notification.find({ receiver: req.user._id })
+                .sort({ createdAt: -1 }) // Sort by most recent
+                .populate("sender", "fullname"); // Populate the sender's fullname from User schema
+    
     return res.render('addBlog', {
         user: req.user,
+        notifications
     });
 });
 // Route to handle form submission
 router.post('/add-new', upload.single('coverImage'), async (req, res) => {
     try {
+        
         const { title, body } = req.body;
         const coverImageURL = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -32,6 +39,9 @@ router.post('/add-new', upload.single('coverImage'), async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     const { id } = req.params; // Get the blog ID from the URL params
+     const notifications = await Notification.find({ receiver: req.user._id })
+               .sort({ createdAt: -1 }) // Sort by most recent
+               .populate("sender", "fullname"); // Populate the sender's fullname from User schema
    
     try {
         const blog = await Blog.findById(id).populate('createdBy'); // Populate createdBy field
@@ -46,7 +56,7 @@ router.get('/:id', async (req, res) => {
         .sort({ createdAt: -1 }); 
         console.log(comments);
         // Render blog details page, passing the populated blog data
-        res.render('blog', { blog, comments,  user: req.user });
+        res.render('blog', { blog, comments,  user: req.user ,notifications});
     } catch (error) {
         console.error('Error fetching blog:', error);
 
@@ -85,9 +95,12 @@ router.post('/comment/:blogId', async (req, res) => {
    console.log(comments);
         // Create a new comment
         
+  const notifications = await Notification.find({ receiver: req.user._id })
+            .sort({ createdAt: -1 }) // Sort by most recent
+            .populate("sender", "fullname"); // Populate the sender's fullname from User schema
 
 
-        res.render('blog', { blog, comments, user: req.user }); 
+        res.render('blog', { blog, comments, user: req.user ,notifications}); 
        
     }
 );

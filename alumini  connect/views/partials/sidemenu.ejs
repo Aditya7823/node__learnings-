@@ -114,6 +114,7 @@
     display: flex;
     flex-direction: column;
     transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
+    top: 30px;
 }
 
 /* Hamburger Icon */
@@ -176,7 +177,7 @@
 
 /* Active Item Styling */
 .side-menu-item.active {
-    background-color: #007bff;
+    background-color: #030303;
     color: #fff;
 }
 
@@ -184,9 +185,32 @@
 @media (max-width: 768px) {
     .side-menu {
         transform: translateX(-20px); /* Hide side menu */
-        width: 35%; /* Collapse to full width when toggled */
+        width: 30%;
+         /* Collapse to full width when toggled */
+    }
+ 
+
+    .side-menu.open {
+        transform: translateX(0); /* Show side menu */
     }
 
+    .hamburger-icon {
+        display: block; /* Show hamburger icon on smaller screens */
+    }
+}
+@media (max-width: 400px) {
+    .side-menu {
+        transform: translateX(-20px); /* Hide side menu */
+        width: 20%;
+         /* Collapse to full width when toggled */
+    }
+    .div{
+        display: none;
+    }
+ 
+  a.side-menu-item span{
+    display: none;
+  }
     .side-menu.open {
         transform: translateX(0); /* Show side menu */
     }

@@ -43,7 +43,16 @@
                     </form>
                 </li>
                 
-                <a href="/notifications/<%= user._id %>" class="btn btn-secondary">Notifications</a>
+                <a href="/notifications/<%= user._id %>" class="btn btn-secondary position-relative">
+                    <i class="bi bi-bell"></i>
+                    <% if (notifications && notifications.length > 0) { %>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <%= notifications.length %>
+                            <span class="visually-hidden">unread notifications</span>
+                        </span>
+                    <% } %>
+                </a>
+                
                 
             </ul>
         </div>
@@ -112,3 +121,5 @@
 }
 
 </style>
+
+     
